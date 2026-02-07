@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use this tutorial/repo, please cite it."
+title: "Xschem + ngspice + Icarus Verilog: AMS co-simulation tutorial (counter)"
+authors:
+  - family-names: "Freitas"
+    given-names: "Édney"
+date-released: "2026-02-07"
+license: "MIT"
+repository-code: "(set-your-github-url-here)"
+keywords:
+  - xschem
+  - ngspice
+  - xspice
+  - verilog
+  - iverilog
+  - ams
+  - cosimulation

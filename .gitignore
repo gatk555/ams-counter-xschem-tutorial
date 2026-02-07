@@ -1,0 +1,20 @@
+# Editors
+*~
+*.swp
+*.swo
+.DS_Store
+
+# Xschem / Ngspice artifacts
+xschem/simulation/*.raw
+xschem/simulation/*.log
+xschem/simulation/*.vcd
+xschem/simulation/*.vvp
+xschem/simulation/counter
+xschem/simulation/*.out
+xschem/simulation/*.dat
+
+# Generic build outputs
+*.raw
+*.log
+*.vcd
+*.vvp
