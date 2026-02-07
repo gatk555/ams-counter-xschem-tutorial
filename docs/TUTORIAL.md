@@ -240,6 +240,11 @@ Schematic snapshot:
 
 ![schematic](assets/schematic_current_mirror_cosim.png)
 
+
+Final co-simulation schematic (digital counter + analog current mirror + plots in one view):
+
+![final co-simulation schematic](assets/completo.png)
+
 ### 7.2 Netlist (core part)
 
 The included netlist is in `xschem/simulation/current_mirror_cosim.spice`.
