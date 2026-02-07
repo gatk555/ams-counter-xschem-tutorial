@@ -1,27 +1,37 @@
-# Contribuindo
+# Contributing
 
-Obrigado pelo interesse em melhorar este repositório.
+Thanks for considering a contribution.
 
-## Como contribuir
+## Scope
 
-1. **Abra uma Issue** descrevendo claramente:
-   - o problema observado
-   - como reproduzir
-   - qual comportamento você esperava
-   - logs relevantes (xschem/ngspice/iverilog)
+This repository is intentionally small and focused on one goal:
+a reproducible open-source AMS co-simulation example using Xschem + Ngspice + Icarus.
 
-2. **Pull Request**
-   - mantenha mudanças pequenas e focadas
-   - atualize a documentação em `docs/` quando necessário
-   - evite adicionar dependências pesadas sem justificativa
+Good contributions include:
+- clearer docs and diagrams
+- small improvements to scripts (portability, error messages)
+- additional examples (resettable counter, FSM, PWM) that remain beginner-friendly
+- fixes for path/config issues across common environments
 
-## Escopo
+Avoid:
+- adding PDK files or proprietary content
+- turning this repo into a large “framework”
 
-- **Dentro do escopo**: melhorias no tutorial, scripts de setup, simplificações do circuito de teste, ajustes de portabilidade.
-- **Fora do escopo**: inclusão de arquivos do PDK (modelos/símbolos) ou conteúdo com licença restritiva.
+## Development workflow
 
-## Checklist do PR
+1. Fork the repo
+2. Create a branch: `git checkout -b feature/your-change`
+3. Make changes
+4. Run:
+   - `./scripts/check_install.sh`
+   - open Xschem and run the co-sim
+5. Submit a PR with:
+   - what changed
+   - why it matters
+   - screenshots/log snippets if relevant
 
-- [ ] tutorial e/ou scripts foram atualizados
-- [ ] `scripts/check_install.sh` executa sem erro
-- [ ] arquivos do PDK **não** foram adicionados
+## Style
+
+- Prefer clear, explicit steps over “magic”
+- Keep examples minimal
+- Use consistent naming (`count_out0` .. `count_out3`, `clk`, etc.)

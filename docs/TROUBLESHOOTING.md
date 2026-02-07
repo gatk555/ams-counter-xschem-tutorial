@@ -1,57 +1,91 @@
-# Troubleshooting (erros comuns)
+# Troubleshooting
 
-## 1) “MISSING SYMBOL” para NMOS/PMOS (sg13_lv_nmos, etc.)
+## 1) `MISSING SYMBOL` boxes appear in Xschem
 
-Causa: `XSCHEM_LIBRARY_PATH` não inclui os símbolos do PDK.
+Cause: Xschem cannot find the `.sym` files because its library search path is incomplete.
 
-Ação:
+Fix:
+1. Run `./scripts/setup_xschem_paths.sh`
+2. Restart Xschem
+3. In Xschem Tcl console, verify:
 
-- garanta que o path do PDK existe (exemplo):
-  - `/usr/local/share/OpenPDKs/IHP-Open-PDK/ihp-sg13g2/libs.tech/xschem`
-  - `/usr/local/share/OpenPDKs/IHP-Open-PDK/ihp-sg13g2/libs.tech/xschem/sg13g2_pr`
-- rode `./scripts/setup_xschem_paths.sh`
+```tcl
+puts $XSCHEM_LIBRARY_PATH
+```
 
-## 2) “MISSING SYMBOL” para vsource/isource/ammeter/code_shown/launcher
-
-Causa: biblioteca do Xschem não está no path.
-
-Ação: inclua pelo menos:
-
+Common missing paths:
 - `/usr/share/xschem/xschem_library`
 - `/usr/share/xschem/xschem_library/devices`
+- the PDK symbol folder (example: `.../libs.tech/xschem/sg13g2_pr`)
 
-## 3) `echo $XSCHEM_LIBRARY_PATH` vazio, mas você “setou” antes
+---
 
-Causas comuns:
+## 2) `echo $XSCHEM_LIBRARY_PATH` prints nothing
 
-- você exportou em um terminal, mas abriu o Xschem por um launcher do desktop (não herda env)
-- você abriu um novo terminal (perdeu export)
+This is not necessarily a problem.
 
-Ação:
+Xschem uses a Tcl variable `XSCHEM_LIBRARY_PATH` usually set in `~/.xschem/xschemrc`.
+Your shell environment variable may be unset, while Xschem still has the correct path.
 
-- abra o Xschem no **mesmo terminal** onde você exportou
-- ou configure permanentemente via `~/.xschem/xschemrc` (script faz isso)
+Check inside Xschem instead:
 
-## 4) ngspice não acha `cornerMOSlv.lib` (ou outros modelos)
+```tcl
+puts $XSCHEM_LIBRARY_PATH
+```
 
-Causa: ngspice não está com o `sourcepath` configurado para o diretório de modelos do PDK.
+---
 
-Ação:
+## 3) Grep for `set/append XSCHEM_LIBRARY_PATH` returns nothing
 
-- verifique se seu ambiente usa `.spiceinit` do PDK (muito comum em OpenPDKs)
-- se você estiver em container, veja se o PDK já injeta isso automaticamente
+If your `~/.xschem/xschemrc` contains only commented examples (lines starting with `#`),
+a regex that matches only non-comment lines will return nothing. That is expected.
 
-## 5) `d_cosim` não existe
+Example that intentionally ignores comments:
 
-Causa: seu ngspice foi compilado sem XSPICE.
+```bash
+grep -nE '^[^#].*(set|append)[[:space:]]+XSCHEM_LIBRARY_PATH' ~/.xschem/xschemrc
+```
 
-Ação:
+---
 
-- use um ngspice que explicitamente suporta XSPICE
-- em ambientes educacionais, o `ngspice-45` geralmente funciona
+## 4) `d_cosim` not found / Ngspice errors about code models
 
-## 6) Ctrl+Click vs duplo clique não abre arquivo
+Cause: Ngspice was built without XSPICE code model support.
 
-Normal: o `tclcommand` (ex.: `edit_file ...`) costuma estar mapeado para **Ctrl+Click**.
+Fix: use an Ngspice build that includes XSPICE. Many EDA containers provide this.
+There is no workaround inside the schematic; `d_cosim` requires XSPICE.
 
-Se você quiser outro comportamento, isso depende da configuração do Xschem na sua instalação.
+---
+
+## 5) Ctrl + click does not trigger the `tclcommand`
+
+Depending on your Xschem version and key bindings:
+- some actions use Ctrl + click
+- some use Shift + click
+- some use right-click context menus
+
+To confirm the symbol has a command, select it and press `q` and verify `tclcommand=...`.
+
+---
+
+## 6) Counter outputs are stuck, or the Verilog prints only `initial`
+
+Most common cause: the Verilog was not compiled before running Ngspice.
+
+Fix:
+- Run the compile launcher (**Icarusate Design**) or run:
+
+```bash
+cd xschem
+iverilog -o counter counter.v
+```
+
+Then rerun the Ngspice simulation.
+
+---
+
+## 7) Digital nodes look analog (sloped edges) or create glitches
+
+This is normal if you load digital outputs with analog elements (caps/resistors) or if you use finite rise/fall on sources.
+If you want ideal digital edges, keep the interface nodes lightly loaded.
+If you want realism, add RC loading intentionally and observe its effect.

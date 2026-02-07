@@ -1,95 +1,94 @@
-# Xschem + ngspice + Icarus Verilog: tutorial completo de co-simulação AMS (contador)
+# AMS Co-simulation in Xschem: Verilog Counter + Ngspice (Icarus + d_cosim)
 
-Este repositório é um tutorial **do zero** para:
+This repository is a beginner-friendly, end-to-end example of **mixed-signal co-simulation (AMS)** using:
 
-- entender o que é um **contador binário** em Verilog
-- compilar/simular o Verilog com **Icarus Verilog (iverilog/vvp)**
-- criar um **símbolo no Xschem** que referencia um `.v`
-- fazer **co-simulação AMS** usando **ngspice + XSPICE `d_cosim`**
-- montar um **circuito analógico simples** no Xschem para “visualizar” o estado digital (via corrente/onda)
+- **Xschem** for schematic capture and plotting
+- **Ngspice** (with **XSPICE code models**) for analog simulation
+- **Icarus Verilog** for the digital model
+- The **`d_cosim`** code model to bridge analog nodes and a Verilog module
 
-> ⚠️ **PDK não incluído**: este repo **não** distribui modelos/símbolos do PDK. Você precisa ter o PDK instalado no seu ambiente (ex.: IHP SG13G2 via OpenPDKs) ou usar um container que já tenha isso.
+You will build and run a simple **4-bit synchronous counter** written in Verilog, embed it as a symbol in Xschem, and drive an **analog current-mirror testbench** that converts the counter bits into a measurable analog current/voltage.
 
-## Sumário
+> Note: The **IHP SG13G2 PDK** symbols/models are **not** redistributed here. This repo assumes you already have the PDK installed (e.g., via OpenPDKs). The example testbench uses `sg13_lv_nmos` devices.
 
-- [Quickstart](#quickstart)
-- [Estrutura do repositório](#estrutura-do-repositório)
-- [Documentação](#documentação)
+## What you get
 
-## Quickstart
+- A minimal Verilog counter (`xschem/counter.v`)
+- A reusable Xschem symbol (`xschem/counter.sym`) and example schematic (`xschem/current_mirror_cosim.sch`)
+- A working Ngspice netlist (`xschem/simulation/current_mirror_cosim.spice`)
+- Launchers inside the schematic for:
+  - compiling Verilog with Icarus (`Icarusate Design`)
+  - loading simulation results back into Xschem (`load waves`)
+- Scripts to check the environment and configure Xschem library paths
 
-### 1) Pré-requisitos
-
-- `xschem` (>= 3.4.x)
-- `ngspice` com suporte a **XSPICE** (ngspice-45 costuma funcionar)
-- `iverilog` (Icarus Verilog) e `vvp`
-- símbolos/modelos do PDK (ex.: IHP SG13G2) acessíveis via `XSCHEM_LIBRARY_PATH` e via `ngspice` (sourcepath)
-
-Valide seu ambiente:
+## Quick start (already have tools installed)
 
 ```bash
+# 1) (Optional) sanity check your environment
 ./scripts/check_install.sh
-```
 
-### 2) Configurar paths do Xschem (recomendado)
-
-Este script adiciona um *snippet* no `~/.xschem/xschemrc` apontando para:
-
-- este repositório (`$AMS_DEMO_HOME/xschem`)
-- biblioteca do Xschem (`/usr/share/xschem/...`)
-- símbolos do PDK IHP SG13G2 (OpenPDKs)
-
-```bash
-export AMS_DEMO_HOME="$PWD"
+# 2) configure Xschem search paths (writes to ~/.xschem/xschemrc)
 ./scripts/setup_xschem_paths.sh
-```
 
-Depois, **abra o Xschem a partir do mesmo terminal** (para herdar `AMS_DEMO_HOME`):
-
-```bash
+# 3) open the schematic
 xschem xschem/current_mirror_cosim.sch
 ```
 
-### 3) Rodar a co-simulação
+Inside Xschem:
 
-Dentro do Xschem:
+1. **Ctrl + click** the `Icarusate Design` launcher to compile `counter.v` into an Icarus executable.
+2. Run the simulation (menu **Simulation -> Run**).
+3. **Ctrl + click** `load waves` to load the `.raw` file and see the plots.
 
-1. Clique no *launcher* **“Icarusate Design”** (Ctrl+Click no símbolo) para compilar o Verilog.
-2. Rode a simulação do ngspice (ícone de “Run” do Xschem).
-3. Clique no *launcher* **“load waves”** para carregar o `.raw` e ver os plots.
 
-## Estrutura do repositório
+## Optional: run a pure-digital Verilog test
 
-- `xschem/` – schematics/símbolos e o Verilog
-- `xschem/simulation/` – deck SPICE de co-simulação
-- `scripts/` – setup e sanity checks
-- `docs/` – tutorial completo (passo a passo)
-
-## Documentação
-
-- `docs/TUTORIAL.md` – tutorial completo, didático e detalhado
-- `docs/TROUBLESHOOTING.md` – erros comuns (missing symbol, paths, d_cosim, etc.)
-
----
-
-## Licença
-
-MIT. Veja `LICENSE`.
-
-## Publicar no GitHub
+If you want to validate the counter without Ngspice:
 
 ```bash
-# 1) Descompacte o zip (se você baixou como arquivo)
-unzip ams-counter-xschem-tutorial.zip
-cd ams-counter-xschem-tutorial
-
-# 2) Inicie o repositório e faça o primeiro commit
-git init
-git add -A
-git commit -m "Initial commit: AMS cosim counter tutorial"
-
-# 3) Crie o repositório no GitHub e conecte o remote
-git branch -M main
-git remote add origin <URL_DO_SEU_REPO>
-git push -u origin main
+cd xschem
+iverilog -g2012 -o tb ../verilog/tb_counter.v counter.v
+vvp tb
 ```
+
+## Repository layout
+
+```text
+.
+├── xschem/
+│   ├── counter.v                     # Verilog counter (DUT)
+│   ├── counter.sym                   # Xschem symbol for the counter
+│   ├── current_mirror_cosim.sch      # Example AMS schematic (analog + DUT)
+│   └── simulation/
+│       └── current_mirror_cosim.spice # Generated/standalone spice netlist
+├── docs/
+│   ├── INSTALL.md
+│   ├── TUTORIAL.md
+│   └── TROUBLESHOOTING.md
+├── scripts/
+│   ├── check_install.sh
+│   └── setup_xschem_paths.sh
+├── Makefile
+└── LICENSE
+```
+
+## Documentation
+
+- Start here: `docs/TUTORIAL.md`
+- Installation notes: `docs/INSTALL.md`
+- Common failures and fixes: `docs/TROUBLESHOOTING.md`
+
+## Why this example is useful
+
+Most “AMS” tutorials are either too abstract or assume commercial EDA tools. This repo is intentionally small and explicit:
+- you can see **every file**
+- you can run it with **open-source tooling**
+- you can adapt the pattern to your own Verilog blocks (FSMs, counters, serializers, etc.)
+
+## Contributing
+
+PRs are welcome. See `CONTRIBUTING.md`.
+
+## License
+
+MIT License. See `LICENSE`.
