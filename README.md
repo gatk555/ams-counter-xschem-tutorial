@@ -9,8 +9,6 @@ This repository is a beginner-friendly, end-to-end example of **mixed-signal co-
 
 You will build and run a simple **4-bit synchronous counter** written in Verilog, embed it as a symbol in Xschem, and drive an **analog current-mirror testbench** that converts the counter bits into a measurable analog current/voltage.
 
-> Note: The **IHP SG13G2 PDK** symbols/models are **not** redistributed here. This repo assumes you already have the PDK installed (e.g., via OpenPDKs). The example testbench uses `sg13_lv_nmos` devices.
-
 ## What you get
 
 - A minimal Verilog counter ([`xschem/counter.v`](xschem/counter.v))
