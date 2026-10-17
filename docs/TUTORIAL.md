@@ -30,11 +30,11 @@ Outputs are bits:
 
 ### 1.2 What is AMS co-simulation here?
 
-We want the digital counter (Verilog) and an analog circuit (SPICE) to run together:
+We want the digital counter (Verilog) and an analog circuit (SPICE) to run together, in an Analog/Mixed Signal Simulation:
 
 - Digital: Icarus Verilog provides the logic and state updates.
 - Analog: Ngspice solves voltages/currents.
-- Bridge: `d_cosim` maps analog voltages on nodes into digital logic levels (0/1) and maps digital outputs back as analog drivers.
+- Bridge: `d_cosim` wraps the Verilog simulation and presents it to ngspice as a digital device; automatically-inserted bridges convert between digital signals and analog voltages on nodes.
 
 This is useful when:
 - you have a digital control block and an analog front-end
@@ -54,9 +54,8 @@ Xschem is the schematic editor. It:
 
 ### 2.2 Ngspice (with XSPICE)
 
-Ngspice runs the analog simulation. With XSPICE enabled, it also supports **code models**, including `d_cosim`.
-
-Without XSPICE, `d_cosim` will not work.
+Ngspice runs the analog simulation. With XSPICE enabled, as it standard,
+it also supports **code models**, including `d_cosim`.
 
 ### 2.3 Icarus Verilog
 
@@ -104,6 +103,8 @@ Key points:
 ## 4. Step-by-step: configure Xschem libraries
 
 If Xschem cannot find symbols, you will see boxes saying `MISSING SYMBOL`.
+This will not usually happen, as this example uses standard symbols included
+with Xschem,
 
 Xschem searches symbols using the Tcl variable `XSCHEM_LIBRARY_PATH` (a colon-separated list of directories).
 
@@ -206,6 +207,7 @@ iverilog -o counter counter.v
 This creates `xschem/counter`, which Ngspice will execute via `vvp` during co-simulation.
 
 Inside the demo schematic, this compilation step is wrapped in a `launcher.sym` button labeled **Icarusate Design**.
+Control-click to compile.
 
 Launcher property:
 
@@ -229,12 +231,13 @@ We create:
 
 1. A **reference current source** `I0 = 10uA`
 2. A **diode-connected NMOS** `M1` to generate a gate bias `Vg`
-3. A **current mirror** (`M2` mirrors `M1`) that produces a unit sink current
-4. Four **switched copies** of a unit current sink (`M4, M6, M8, M10`) controlled by the counter outputs through **switch transistors** (`M3, M5, M7, M9`)
-5. A **sense resistor** `R5` that converts total sink current into a measurable voltage
-6. A **0 V source** `VAMM2` used as an ammeter so we can plot `i(VAMM2)`
+3. Four **switched copies** of scaled current sinks (`M4, M6, M8, M10`) controlled by the counter outputs through **switch transistors** (`M3, M5, M7, M9`)
+4. A **0 V source** `VAMM2` used as an ammeter so we can plot `i(VAMM2)`
 
-When a counter bit is high, its switch turns on, enabling an extra current sink. The total current changes over time, producing the staircase-like analog waveform.
+When a counter bit is high, its switch turns on, enabling an extra
+current sink. The transistor widths set each current proportional to the
+weight of the controlling counter output.
+The total current changes over time, producing the staircase-like analog waveform.
 
 Schematic snapshot:
 

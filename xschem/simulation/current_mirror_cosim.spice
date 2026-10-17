@@ -5,17 +5,15 @@ V2 CLK 0 pulse 0 'VCC' 500n 10n 10n 490n 1u
 M1 Vg Vg 0 0 nm w=2u l=1u
 I0 net1 Vg 10u
 V1 net1 0 1.5
-M2 net3 Vg 0 0 nm w=2u l=1u
-R5 net1 net2 0.1Meg
-VAMM2 net2 net3 0
-M3 net3 count_out0 net4 0 nm w=10u l=0.13u
-M4 net4 Vg 0 0 nm w=2u l=1u
-M5 net3 count_out1 net5 0 nm w=10u l=0.13u
-M6 net5 Vg 0 0 nm w=2u l=1u
-M7 net3 count_out2 net6 0 nm w=10u l=0.13u
-M8 net6 Vg 0 0 nm w=2u l=1u
-M9 net3 count_out3 net7 0 nm w=10u l=0.13u
-M10 net7 Vg 0 0 nm w=2u l=1u
+VAMM net1 net2 0
+M3 net2 count_out0 net6 0 nm w=10u l=0.13u
+M4 net6 Vg 0 0 nm w=0.5u l=1u
+M5 net2 count_out1 net3 0 nm w=10u l=0.13u
+M6 net3 Vg 0 0 nm w=1u l=1u
+M7 net2 count_out2 net4 0 nm w=10u l=0.13u
+M8 net4 Vg 0 0 nm w=2u l=1u
+M9 net2 count_out3 net5 0 nm w=10u l=0.13u
+M10 net5 Vg 0 0 nm w=4u l=1u
 **** begin user architecture code
 
 

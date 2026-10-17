@@ -9,8 +9,13 @@ a prebuilt EDA container used by the open-source silicon community).
 You need the following installed and available on your `PATH`:
 
 - `xschem` (tested with 3.4.x)
-- `ngspice` built with **XSPICE code models** (tested with ngspice-45)
+- `ngspice` built with **XSPICE code models** (tested with ngspice-47)
 - `iverilog` and `vvp` (Icarus Verilog)
+
+OS-packaged builds of Icarus Verilog will not work,
+as the software must be built with the --enable-libvvp option.
+Suitable binary builds of ngspice and Icarus Verilog may be downloaded from 
+[`here.`](https://github.com/gatk555/ngspice-builds)
 
 Verify:
 
