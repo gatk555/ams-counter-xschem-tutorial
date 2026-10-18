@@ -15,7 +15,7 @@ You need the following installed and available on your `PATH`:
 OS-packaged builds of Icarus Verilog will not work,
 as the software must be built with the --enable-libvvp option.
 Suitable binary builds of ngspice and Icarus Verilog may be downloaded from 
-[`here.`](https://github.com/gatk555/ngspice-builds)
+[here.](https://github.com/gatk555/ngspice-builds)
 
 Verify:
 
@@ -26,6 +26,7 @@ iverilog -V | head -n 2
 ```
 ## Xschem library search paths
 
+In unusual cases, you may run into a problem with missing component sysmbols.
 Xschem resolves symbols through its **Tcl variable** `XSCHEM_LIBRARY_PATH`.
 Setting the shell environment variable is often not enough if `~/.xschem/xschemrc` overrides it.
 

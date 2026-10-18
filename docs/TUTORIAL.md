@@ -2,13 +2,12 @@
 
 This document assumes you start from zero: no prior files, no prior schematic.
 
-You will learn:
+What is covered here:
 
 1. What a counter is and how to write one in Verilog
-2. How Xschem organizes symbols and libraries
-3. How to represent a Verilog block as a symbol in Xschem
-4. How Ngspice + `d_cosim` can co-simulate analog and digital
-5. How to build an analog testbench (current mirror + switches) to “observe” the counter outputs
+2. How to represent a Verilog block as a symbol in Xschem
+3. How Ngspice + `d_cosim` can co-simulate analog and digital
+4. How to build an analog testbench (current mirror + switches) to “observe” the counter outputs
 
 ---
 
@@ -34,7 +33,7 @@ We want the digital counter (Verilog) and an analog circuit (SPICE) to run toget
 
 - Digital: Icarus Verilog provides the logic and state updates.
 - Analog: Ngspice solves voltages/currents.
-- Bridge: `d_cosim` wraps the Verilog simulation and presents it to ngspice as a digital device; automatically-inserted bridges convert between digital signals and analog voltages on nodes.
+- Bridges: An Ngspice component, `d_cosim` wraps the Verilog simulation and presents it to ngspice as a digital device; automatically-inserted bridges convert between digital signals and analog voltages on nodes.
 
 This is useful when:
 - you have a digital control block and an analog front-end
@@ -47,15 +46,17 @@ This is useful when:
 ### 2.1 Xschem
 
 Xschem is the schematic editor. It:
-- places symbols (`.sym`)
+- places symbols and links them with wires(`.sym`)
 - saves schematics (`.sch`)
 - generates simulation netlists (SPICE)
-- can show waveforms by reading `.raw` data
+- can show waveforms by reading back `.raw` data
+
+Mouse and keyboard actions to build an Xschem schematic are described in the Xschem documentation.
 
 ### 2.2 Ngspice (with XSPICE)
 
-Ngspice runs the analog simulation. With XSPICE enabled, as it standard,
-it also supports **code models**, including `d_cosim`.
+Ngspice runs the analog simulation. With XSPICE enabled, as is standard,
+it also supports **code models**, including `d_cosim` and digital<->analog bridges.
 
 ### 2.3 Icarus Verilog
 
@@ -94,48 +95,23 @@ endmodule
 ```
 
 Key points:
-- `reg [3:0] count` because it is assigned in an `always` block.
+- `reg [3:0] counts` because it is assigned in an `always` block.
 - Non-blocking assignment (`<=`) is idiomatic for sequential logic.
-- `timescale` helps avoid time-unit ambiguity when tools interact.
+- `timescale` defines the time-unit when tools interact.
 
 ---
 
-## 4. Step-by-step: configure Xschem libraries
+## 4. Step-by-step: create a symbol for the Verilog block
 
-If Xschem cannot find symbols, you will see boxes saying `MISSING SYMBOL`.
-This will not usually happen, as this example uses standard symbols included
-with Xschem,
-
-Xschem searches symbols using the Tcl variable `XSCHEM_LIBRARY_PATH` (a colon-separated list of directories).
-
-Run:
-
-```bash
-./scripts/setup_xschem_paths.sh
-```
-
-Then restart Xschem.
-
-### 4.1 How to verify inside Xschem
-
-Open **Options -> Tcl console** and run:
-
-```tcl
-puts $XSCHEM_LIBRARY_PATH
-```
-
-This prints the search path Xschem is actually using (more reliable than `echo $XSCHEM_LIBRARY_PATH` in your shell).
-
----
-
-## 5. Step-by-step: create a symbol for the Verilog block
+This repo already includes a working `counter.sym` you can use,
+this is how it was made.
 
 There are two parts:
 
 1) the **symbol drawing** (`counter.sym`) with pins
 2) the **instance properties** (in the schematic) telling Ngspice to use `d_cosim`
 
-### 5.1 Create the symbol file (`counter.sym`)
+### 4.1 Create the symbol file (`counter.sym`)
 
 In Xschem:
 
@@ -155,9 +131,7 @@ Save the symbol as:
 xschem/counter.sym
 ```
 
-Tip: this repo already includes a working `counter.sym` you can reuse.
-
-### 5.2 Optional: show the Verilog source inside Xschem
+### 4.2 Optional: show the Verilog source inside Xschem
 
 You can place `devices/code_shown.sym` and set its `value` to:
 
@@ -167,7 +141,7 @@ tcleval([read_data [abs_sym_path counter.v]])
 
 This makes the Verilog file appear as readable text on the schematic, which is useful for tutorials and reviews.
 
-### 5.3 Add the d_cosim model (instance properties)
+### 4.3 Add the d_cosim model (instance properties)
 
 Place `counter.sym` into your schematic. Then select it and press `q` (Edit Properties).
 
@@ -193,7 +167,7 @@ Example screenshot:
 
 ---
 
-## 6. Step-by-step: compile the Verilog for co-simulation
+## 5. Step-by-step: compile the Verilog for co-simulation
 
 `d_cosim` does not compile Verilog for you. You must create the `counter` executable first.
 
@@ -221,18 +195,18 @@ Example screenshot:
 
 ---
 
-## 7. Step-by-step: build the analog testbench (current mirror + switched sinks)
+## 6. Step-by-step: build the analog testbench (current mirror + switched sinks)
 
 The goal: turn digital bits into an analog observable quantity.
 
-### 7.1 Circuit idea
+### 6.1 Circuit idea
 
 We create:
 
 1. A **reference current source** `I0 = 10uA`
 2. A **diode-connected NMOS** `M1` to generate a gate bias `Vg`
 3. Four **switched copies** of scaled current sinks (`M4, M6, M8, M10`) controlled by the counter outputs through **switch transistors** (`M3, M5, M7, M9`)
-4. A **0 V source** `VAMM2` used as an ammeter so we can plot `i(VAMM2)`
+4. A **0 V source** `VAMM` used as an ammeter so we can plot `i(VAMM)`
 
 When a counter bit is high, its switch turns on, enabling an extra
 current sink. The transistor widths set each current proportional to the
@@ -248,9 +222,11 @@ Final co-simulation schematic (digital counter + analog current mirror + plots i
 
 ![final co-simulation schematic](assets/completo.png)
 
-### 7.2 Netlist (core part)
+### 7 Netlist
 
-The included netlist is in `xschem/simulation/current_mirror_cosim.spice`.
+The included netlist in `xschem/simulation/current_mirror_cosim.spice`
+should be identical to the one Xschem makes from the schematic.
+The **Netlist** button in the menu bar creates the netlist.
 
 Key elements (simplified):
 
@@ -264,28 +240,25 @@ I0 net1 Vg 10u
 * Diode-connected NMOS sets Vg
 M1 Vg Vg 0 0 sg13_lv_nmos w=2u l=1u
 
-* Mirror device produces a base sink current
-M2 net3 Vg 0 0 sg13_lv_nmos w=2u l=1u
+* The outout device is an ammeter
 
-* Sense resistor and ammeter
-R5 net1 net2 0.1Meg
-VAMM2 net2 net3 0
+VAMM net2 net3 0
 
-* Bit-controlled current sinks
-M3 net3 count_out0 net4 0 sg13_lv_nmos w=10u l=0.13u  ; switch
-M4 net4 Vg 0 0       sg13_lv_nmos w=2u  l=1u         ; sink
+* One of four bit-controlled current sinks
+M3 net3 count_out0 net4 0 nm w=10u l=0.13u  ; switch
+M4 net4 Vg 0 0 nm w=0.5u  l=1u                ; sink
 ...
 ```
 
-### 7.3 Why two NMOS per bit?
+### 7.1 Why two NMOS transistors per bit?
 
-- The **sink transistor** (e.g., `M4`) is biased by `Vg`, so it behaves as a current source/sink.
+- The **sink transistor** (e.g., `M4`) is biased by `Vg`, so it behaves as a current sink. The current is approximately equal to the width; that is set in proportion to the numerical value of the bit.
 - The **switch transistor** (e.g., `M3`) is controlled by a digital node and acts like an on/off gate.
-- This isolates the analog bias network (`Vg`) from the digital outputs.
+- The analog bias network (`Vg`) is isolated from the digital outputs.
 
-### 7.4 What you should plot
+### 7.3 What outputs to plot
 
-- `i(VAMM2)` : total sink current
+- `i(VAMM)` : total sink current
 - `clk` and `count_out[0..3]` : digital behavior (as analog waveforms)
 
 Example plot:
@@ -294,7 +267,7 @@ Example plot:
 
 ---
 
-## 8. Step-by-step: run the full AMS simulation
+## 7. Step-by-step: run the full AMS simulation
 
 ### Option A: run from inside Xschem (recommended)
 
@@ -304,9 +277,9 @@ Example plot:
 xschem xschem/current_mirror_cosim.sch
 ```
 
-2. **Ctrl + click** `Icarusate Design` to compile the Verilog block.
-3. Run simulation (**Simulation -> Run**).
-4. **Ctrl + click** `load waves` to load and plot the `.raw` results.
+2. **Ctrl + click** `Icarusate design` to compile the Verilog block.
+3. Run simulation (menu button **Simulation**).
+4. **Ctrl + click** `Load waves` to load and plot the `.raw` results.
 
 ### Option B: run Ngspice from the terminal
 
@@ -319,11 +292,13 @@ This produces:
 - `run.log`
 - `current_mirror_cosim.raw`
 
-You can open plots in Xschem by using `raw_read` (the `load waves` launcher does this automatically).
+You can open plots in Xschem by using `raw_read` (the `Load waves` launcher does this automatically).
 
 ---
 
-## 9. Understanding the launchers
+## 8. Understanding the launchers and graphs
+
+### 8.1 Launchers
 
 The schematic uses the standard Xschem symbol `devices/launcher.sym` as a clickable button that executes a Tcl command.
 
@@ -339,9 +314,14 @@ If Ctrl + click does nothing, check:
 - whether the symbol really has a `tclcommand=` property
 - the Xschem console output (errors are printed there)
 
+### 8.2 Graphs
+
+Graphs are added to the schematic by menu entry
+**Simulation->Graphs->Add waveform graph** and configured by keyboard and mouse actions.
+
 ---
 
-## 10. Next steps
+## 9. Next steps
 
 Once you understand this example, try:
 

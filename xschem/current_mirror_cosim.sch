@@ -1,4 +1,4 @@
-v {xschem version=3.4.8RC file_version=1.3}
+load {xschem version=3.4.8RC file_version=1.3}
 G {}
 K {}
 V {}
@@ -210,11 +210,11 @@ write current_mirror_cosim.raw
 C {lab_pin.sym} -180 -850 0 0 {name=p3 lab=CLK}
 C {lab_pin.sym} 270 -850 0 1 {name=p5 lab=count_out[3..0]}
 C {launcher.sym} 1050 -435 0 0 {name=h5
-descr="load waves" 
+descr="Load waves"
 tclcommand="xschem raw_read $netlist_dir/[file tail [file rootname [xschem get current_name]]].raw tran"
 }
 C {launcher.sym} 1050 -385 0 0 {name=h1
-descr="Icarusate Design" 
+descr="Icarusate design"
 tclcommand="execute 1 sh -c \\"cd $netlist_dir; iverilog -o counter [abs_sym_path ./counter.v]\\""}
 C {counter.sym} -60 -850 0 0 {name=a1 model=counter
 

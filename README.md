@@ -1,42 +1,39 @@
 # AMS Co-simulation in Xschem: Verilog Counter + Ngspice (Icarus + d_cosim)
 
-This repository is a beginner-friendly, end-to-end example of **mixed-signal co-simulation (AMS)** using:
+This repository is intended as a beginner-friendly, end-to-end example of **mixed-signal co-simulation (AMS)** using:
 
-- **Xschem** for schematic capture and plotting
+- **Xschem** a graphical tool for schematic capture and plotting
 - **Ngspice** (with **XSPICE code models**) for analog simulation
-- **Icarus Verilog** for the digital model
-- The **`d_cosim`** code model to bridge analog nodes and a Verilog module
+- **Icarus Verilog** for the digital model, linked into an Ngspice simulation.
 
-You will build and run a simple **4-bit synchronous counter** written in Verilog, embed it as a symbol in Xschem, and drive an **analog current-mirror testbench** that converts the counter bits into a measurable analog current/voltage.
+It describes the steps to build and run a simple **4-bit synchronous counter** written in Verilog, embed it as a symbol in Xschem, and drive an **analog current-mirror testbench** that converts the counter bits into a measurable analog current.
 
-## What you get
+## What is here
 
 - A minimal Verilog counter ([`xschem/counter.v`](xschem/counter.v))
 - A reusable Xschem symbol (`xschem/counter.sym`) and example schematic (`xschem/current_mirror_cosim.sch`)
-- A working Ngspice netlist ([`xschem/simulation/current_mirror_cosim.spice`](xschem/simulation/current_mirror_cosim.spice))
+- A working netlist ([`xschem/simulation/current_mirror_cosim.spice`](xschem/simulation/current_mirror_cosim.spice)). This is the input file for Ngspice.
 - Launchers inside the schematic for:
   - compiling Verilog with Icarus (`Icarusate Design`)
-  - loading simulation results back into Xschem (`load waves`)
-- Scripts to check the environment and configure Xschem library paths
+  - loading simulation results back into Xschem (`Load waves`)
+- Scripts to check the environment
 
-## Quick start (already have tools installed)
+## Quick start (tools already installed)
 
 ```bash
 # 1) (Optional) sanity check your environment
 ./scripts/check_install.sh
 
-# 2) configure Xschem search paths (writes to ~/.xschem/xschemrc)
-./scripts/setup_xschem_paths.sh
-
-# 3) open the schematic
+# 2) open the schematic
 xschem xschem/current_mirror_cosim.sch
 ```
 
 Inside Xschem:
 
-1. **Ctrl + click** the `Icarusate Design` launcher to compile `counter.v` into an Icarus executable.
-2. Run the simulation (menu **Simulation -> Run**).
-3. **Ctrl + click** `load waves` to load the `.raw` file and see the plots.
+1. **Ctrl + click** the `Icarusate design` launcher to compile `counter.v` into an Icarus executable.
+2. Generate the SPICE netlist (menu bar button **Netlist**)
+3. Run the simulation (menu bar button button **Simulation**)
+4. **Ctrl + click** `Load waves` to load the `.raw` file and see the plots.
 
 
 ## Optional: run a pure-digital Verilog test
@@ -72,15 +69,15 @@ vvp tb
 
 ## Documentation
 
-- Start here: [`docs/TUTORIAL.md`](docs/TUTORIAL.md)
-- Installation notes: [`docs/INSTALL.md`](docs/INSTALL.md)
-- Common failures and fixes: [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md)
+- Start here: [`TUTORIAL.md`](docs/TUTORIAL.md)
+- Installation notes: [`INSTALL.md`](docs/INSTALL.md)
+- Possible failures and fixes: [`TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md)
 
-## Why this example is useful
+## Why this example may be useful
 
 Most “AMS” tutorials are either too abstract or assume commercial EDA tools. This repo is intentionally small and explicit:
-- you can see **every file**
-- you can run it with **open-source tooling**
+- **every file** is visible
+- it runs on **open-source tools**
 - you can adapt the pattern to your own Verilog blocks (FSMs, counters, serializers, etc.)
 
 ## Contributing
